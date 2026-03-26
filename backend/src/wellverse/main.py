@@ -62,6 +62,12 @@ def health():
 
 
 # Serve frontend static files in production
-dist = Path(__file__).resolve().parent.parent.parent.parent / "frontend" / "dist"
-if dist.exists():
-    app.mount("/", StaticFiles(directory=str(dist), html=True), name="frontend")
+# Check multiple possible locations
+for _dist_candidate in [
+    Path(__file__).resolve().parent.parent.parent.parent / "frontend" / "dist",  # local dev
+    Path("/app/frontend/dist"),  # Docker
+    Path(__file__).resolve().parent.parent.parent / "frontend" / "dist",
+]:
+    if _dist_candidate.exists() and (_dist_candidate / "index.html").exists():
+        app.mount("/", StaticFiles(directory=str(_dist_candidate), html=True), name="frontend")
+        break

@@ -74,7 +74,7 @@ export default function Home({ onOpenGuide }) {
           <div>
             <div className="fu text-[11px] font-bold tracking-[3px] text-amber uppercase mb-5">✦  Building WellVerse — 6 Dimensions of Self</div>
             <h1 className="fu d1 font-display font-light leading-none mb-1.5" style={{ fontSize: 'clamp(46px,6vw,86px)' }}>Invest in your</h1>
-            <div className="font-display font-semibold leading-tight mb-7 overflow-hidden" style={{ fontSize: 'clamp(46px,6vw,86px)', height: '1.15em' }}>
+            <div className="font-display font-semibold leading-tight mb-7 overflow-hidden" style={{ fontSize: 'clamp(46px,6vw,86px)', height: '1.35em' }}>
               <span className="wc text-shimmer italic">{WORDS[wi]}</span>
             </div>
             <p className="fu d2 text-lg text-dust leading-[1.85] max-w-[510px] mb-3">Self-investment doesn't live in one dimension.</p>

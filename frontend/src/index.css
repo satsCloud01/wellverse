@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #C8923A; border-radius: 2px; }
+
+/* ─── EXISTING ANIMATIONS ─────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes wordSwap {
+  0% { opacity: 0; transform: translateY(12px); }
+  15% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.fu { animation: fadeUp .75s ease forwards; }
+.d1 { animation-delay: .12s; opacity: 0; }
+.d2 { animation-delay: .28s; opacity: 0; }
+.d3 { animation-delay: .44s; opacity: 0; }
+.wc { animation: wordSwap 2.1s ease-in-out infinite; display: inline-block; }
+
+@keyframes scrollHint {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(8px); }
+}
+.scroll-hint { animation: scrollHint 2s ease-in-out infinite; }
+
+@keyframes slowZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+.video-zoom { animation: slowZoom 25s ease-in-out alternate infinite; }
+
+/* ─── AMBIENT BACKGROUND ANIMATIONS ──────────────────── */
+
+/* Floating orb — slow drifting radial glow */
+@keyframes orbDrift {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.12; }
+  25%  { transform: translate(60px, -40px) scale(1.15); opacity: 0.18; }
+  50%  { transform: translate(-30px, 50px) scale(0.9); opacity: 0.1; }
+  75%  { transform: translate(-50px, -20px) scale(1.1); opacity: 0.16; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.12; }
+}
+
+/* Pulse — gentle breathing effect */
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); opacity: 0.06; }
+  50% { transform: scale(1.3); opacity: 0.14; }
+}
+
+/* Aurora sweep — horizontal color band drift */
+@keyframes auroraSweep {
+  0%   { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+  20%  { opacity: 0.06; }
+  50%  { opacity: 0.04; }
+  80%  { opacity: 0.06; }
+  100% { transform: translateX(200%) skewX(-15deg); opacity: 0; }
+}
+
+/* Particle float — tiny dots drifting up */
+@keyframes particleFloat {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  10%  { opacity: 0.4; }
+  90%  { opacity: 0.4; }
+  100% { transform: translateY(-120px) translateX(20px); opacity: 0; }
+}
+
+/* Grain texture shimmer */
+@keyframes grainShift {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2%, -2%); }
+  30% { transform: translate(1%, 3%); }
+  50% { transform: translate(-3%, 1%); }
+  70% { transform: translate(3%, -1%); }
+  90% { transform: translate(1%, 2%); }
+}
+
+/* ─── AMBIENT LAYER CLASSES ──────────────────────────── */
+
+/* Apply to any section for floating orbs */
+.ambient-orbs {
+  position: relative;
+  overflow: hidden;
+}
+.ambient-orbs::before,
+.ambient-orbs::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+}
+.ambient-orbs::before {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(42,106,96,.25) 0%, transparent 70%);
+  top: -10%;
+  right: -5%;
+  animation: orbDrift 20s ease-in-out infinite;
+}
+.ambient-orbs::after {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(200,146,58,.2) 0%, transparent 70%);
+  bottom: -8%;
+  left: -3%;
+  animation: orbDrift 25s ease-in-out infinite reverse;
+}
+
+/* Teal-tinted orbs variant */
+.ambient-orbs-teal::before {
+  background: radial-gradient(circle, rgba(42,106,96,.3) 0%, transparent 70%) !important;
+}
+.ambient-orbs-teal::after {
+  background: radial-gradient(circle, rgba(58,154,120,.18) 0%, transparent 70%) !important;
+}
+
+/* Gold-tinted orbs variant */
+.ambient-orbs-gold::before {
+  background: radial-gradient(circle, rgba(200,146,58,.22) 0%, transparent 70%) !important;
+}
+.ambient-orbs-gold::after {
+  background: radial-gradient(circle, rgba(226,185,111,.15) 0%, transparent 70%) !important;
+}
+
+/* Wine-tinted orbs variant */
+.ambient-orbs-wine::before {
+  background: radial-gradient(circle, rgba(106,42,64,.2) 0%, transparent 70%) !important;
+}
+.ambient-orbs-wine::after {
+  background: radial-gradient(circle, rgba(180,98,120,.12) 0%, transparent 70%) !important;
+}
+
+/* Pulsing background glow */
+.ambient-pulse {
+  position: relative;
+  overflow: hidden;
+}
+.ambient-pulse::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(42,106,96,.15) 0%, transparent 60%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: gentlePulse 8s ease-in-out infinite;
+  filter: blur(60px);
+}
+
+/* Aurora sweep band */
+.ambient-aurora {
+  position: relative;
+  overflow: hidden;
+}
+.ambient-aurora::before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(90deg, transparent, rgba(42,106,96,.12), rgba(200,146,58,.08), transparent);
+  pointer-events: none;
+  animation: auroraSweep 18s ease-in-out infinite;
+}
+
+/* Film grain overlay — ultra subtle texture */
+.ambient-grain {
+  position: relative;
+}
+.ambient-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+  animation: grainShift 4s steps(6) infinite;
+  z-index: 1;
+}
+
+/* Floating particles container */
+.ambient-particles {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── SCROLL-TRIGGERED FADE IN ───────────────────────── */
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-in-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card hover glow */
+.card-glow {
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+.card-glow:hover {
+  box-shadow: 0 0 40px rgba(42,106,96,.12), 0 20px 50px rgba(0,0,0,.4);
+  transform: translateY(-3px);
+}
+
+/* Subtle shimmer on text */
+@keyframes textShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.text-shimmer {
+  background: linear-gradient(90deg, #C4BAA8 0%, #E2B96F 25%, #C8923A 50%, #E2B96F 75%, #C4BAA8 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 6s linear infinite;
+}
+
+/* Breathing border */
+@keyframes borderBreathe {
+  0%, 100% { border-color: rgba(255,255,255,.06); }
+  50% { border-color: rgba(42,106,96,.25); }
+}
+.border-breathe {
+  animation: borderBreathe 4s ease-in-out infinite;
+}

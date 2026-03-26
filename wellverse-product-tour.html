@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>WellVerse — Product Tour</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --void:#0A0A08;--ink:#111410;--ember:#1A1A14;
+  --parchment:#F2EDE4;--dust:#C4BAA8;--mist:#8A9E96;
+  --amber:#C8923A;--gold:#E2B96F;--teal:#2A6A60;--pine:#3A9A78;
+  --moss:#3A5A40;--sage:#6A9E72;--wine:#6A2A40;--rose:#B46278;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--void);font-family:'Outfit',sans-serif;color:var(--parchment)}
+canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.grain{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#stage{position:fixed;top:0;left:0;width:100%;height:100%;z-index:3}
+.scene{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;transition:opacity .8s ease;pointer-events:none;padding:60px 120px}
+.scene.active{opacity:1;pointer-events:auto}
+.font-display{font-family:'Cormorant Garamond',serif}
+.text-shimmer{background:linear-gradient(90deg,var(--amber),var(--gold),var(--amber));background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes countUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes letterReveal{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(200,146,58,.3)}50%{box-shadow:0 0 40px rgba(200,146,58,.6)}}
+@keyframes flipIn{from{opacity:0;transform:perspective(600px) rotateX(-15deg) translateY(20px)}to{opacity:1;transform:perspective(600px) rotateX(0) translateY(0)}}
+@keyframes aurora{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes borderBreathe{0%,100%{border-color:rgba(200,146,58,.25)}50%{border-color:rgba(200,146,58,.5)}}
+@keyframes wordCycle{0%,18%{opacity:1;transform:translateY(0)}22%,100%{opacity:0;transform:translateY(-30px)}}
+
+/* Progress bar */
+#progress-bar{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--amber),var(--gold));z-index:100;transition:width .3s linear;width:0}
+/* Controls */
+#controls{position:fixed;bottom:20px;right:30px;z-index:100;display:flex;gap:12px;align-items:center}
+#controls button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--dust);padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;backdrop-filter:blur(10px);transition:all .3s}
+#controls button:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2)}
+#scene-dots{position:fixed;right:30px;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .4s;cursor:pointer}
+.dot.active{background:var(--gold);box-shadow:0 0 10px rgba(226,185,111,.5)}
+/* Shared */
+.pain{display:flex;align-items:center;gap:14px;font-size:18px;color:var(--dust);opacity:0;margin-bottom:16px}
+.pain.show{animation:fadeUp .6s ease forwards}
+.guide-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 24px;text-align:center;opacity:0;transform:translateY(40px)}
+.guide-card.show{animation:fadeUp .5s ease forwards}
+.verified{display:inline-flex;align-items:center;gap:5px;background:rgba(58,154,120,.15);border:1px solid rgba(58,154,120,.35);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--pine);font-weight:600;margin-top:8px;opacity:0}
+.verified.show{animation:scaleIn .3s ease forwards}
+.feature-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px;opacity:0;transform:perspective(600px) rotateX(-15deg) translateY(20px)}
+.feature-card.show{animation:flipIn .5s ease forwards}
+.tier-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:32px 28px;text-align:center;opacity:0;transform:translateY(30px);position:relative;flex:1}
+.tier-card.show{animation:fadeUp .5s ease forwards}
+.tier-card.popular{background:rgba(200,146,58,.07);border:2px solid var(--amber);animation:borderBreathe 3s ease infinite}
+.most-pop{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--amber);color:#fff;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:4px 16px;border-radius:20px;white-space:nowrap;animation:glowPulse 2s ease infinite}
+.vet-step{display:flex;align-items:flex-start;gap:20px;opacity:0;transform:translateX(-30px)}
+.vet-step.show{animation:fadeUp .5s ease forwards}
+.vet-num{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;color:var(--amber);line-height:1}
+.stat-box{text-align:center;opacity:0;transform:translateY(20px)}
+.stat-box.show{animation:countUp .6s ease forwards}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:600;color:var(--gold);line-height:1}
+.big-num{font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--gold);line-height:1}
+.hexagon-container{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin:30px 0}
+.hex-item{display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;transform:scale(.7)}
+.hex-item.show{animation:scaleIn .4s ease forwards}
+.hex-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;border:2px solid rgba(255,255,255,.1);transition:all .5s}
+.hex-icon.lit{border-color:currentColor;box-shadow:0 0 25px currentColor}
+/* Word cycler */
+.word-cycler{position:relative;display:inline-block;height:1.15em;overflow:hidden;vertical-align:bottom}
+.word-cycler span{display:block;animation:wordCycle 2.1s ease infinite;position:absolute;left:0;width:100%;text-align:left}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="grain"></div>
+<div id="stage">
+
+<!-- Scene 1: Logo Reveal -->
+<div class="scene" id="s0">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:20px">
+    <div id="logo-circle" style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--gold),var(--teal));display:flex;align-items:center;justify-content:center;font-size:36px;opacity:0;transform:scale(.5);transition:all 1s ease">✦</div>
+    <h1 id="logo-text" class="font-display" style="font-size:72px;font-weight:300;letter-spacing:4px;overflow:hidden"><span id="logo-letters"></span></h1>
+    <p id="logo-tag" style="font-size:16px;color:var(--dust);letter-spacing:3px;text-transform:uppercase;opacity:0;transition:opacity 1s ease .5s">Where Self-Investment Begins</p>
+  </div>
+</div>
+
+<!-- Scene 2: Problem -->
+<div class="scene" id="s1">
+  <div style="max-width:800px;text-align:center">
+    <h2 class="font-display" style="font-size:52px;font-weight:300;margin-bottom:50px;opacity:0" id="s1-head">The wellness industry has a trust problem.</h2>
+    <div id="s1-pains" style="text-align:left;max-width:600px;margin:0 auto">
+      <div class="pain"><span style="font-size:22px">❌</span> Unvetted coaches flooding every platform</div>
+      <div class="pain"><span style="font-size:22px">❌</span> Tool fragmentation across 5+ apps</div>
+      <div class="pain"><span style="font-size:22px">❌</span> Discovery based on followers, not outcomes</div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 3: Solution -->
+<div class="scene" id="s2">
+  <div style="text-align:center;max-width:900px">
+    <p style="font-size:12px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:14px;opacity:0" id="s2-sub">The WellVerse Model</p>
+    <h2 class="font-display" style="font-size:52px;font-weight:300;margin-bottom:12px;opacity:0" id="s2-head">Six dimensions. One platform.</h2>
+    <div class="hexagon-container" id="s2-hex">
+      <div class="hex-item" data-color="#4A7A9A"><div class="hex-icon">🧠</div><span style="font-size:14px;color:var(--dust)">Mind</span></div>
+      <div class="hex-item" data-color="#C8923A"><div class="hex-icon">💪</div><span style="font-size:14px;color:var(--dust)">Body</span></div>
+      <div class="hex-item" data-color="#6A9E72"><div class="hex-icon">🌾</div><span style="font-size:14px;color:var(--dust)">Nutrition</span></div>
+      <div class="hex-item" data-color="#B46278"><div class="hex-icon">♡</div><span style="font-size:14px;color:var(--dust)">Relationships</span></div>
+      <div class="hex-item" data-color="#9A7AB8"><div class="hex-icon">✨</div><span style="font-size:14px;color:var(--dust)">Beauty</span></div>
+      <div class="hex-item" data-color="#C87A5A"><div class="hex-icon">✺</div><span style="font-size:14px;color:var(--dust)">Passion</span></div>
+    </div>
+    <p style="font-size:16px;color:var(--mist);max-width:620px;margin:10px auto 0;line-height:1.8;opacity:0" id="s2-foot">Every guide personally vetted. Every session tracked. Every dimension connected.</p>
+  </div>
+</div>
+
+<!-- Scene 4: Guide Profiles -->
+<div class="scene" id="s3">
+  <div style="text-align:center;width:100%;max-width:1000px">
+    <p style="font-size:12px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:14px;opacity:0" id="s3-sub">Founding Guides</p>
+    <h2 class="font-display" style="font-size:48px;font-weight:300;margin-bottom:40px;opacity:0" id="s3-head">Meet your guides.</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px" id="s3-cards">
+      <div class="guide-card">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--pine));margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px">AO</div>
+        <p class="font-display" style="font-size:20px;font-weight:500">Dr. Amara Osei</p>
+        <p style="font-size:13px;color:var(--mist);margin:4px 0">Psychological Coach</p>
+        <p style="font-size:14px;color:var(--gold)">★ 4.9</p>
+        <div class="verified">✓ Verified</div>
+      </div>
+      <div class="guide-card">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--gold));margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px">ME</div>
+        <p class="font-display" style="font-size:20px;font-weight:500">Marcus Eze</p>
+        <p style="font-size:13px;color:var(--mist);margin:4px 0">Strength Coach</p>
+        <p style="font-size:14px;color:var(--gold)">★ 4.8</p>
+        <div class="verified">✓ Verified</div>
+      </div>
+      <div class="guide-card">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#5A3A6A,#9A7AB8);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px">PM</div>
+        <p class="font-display" style="font-size:20px;font-weight:500">Priya Menon</p>
+        <p style="font-size:13px;color:var(--mist);margin:4px 0">Mindfulness</p>
+        <p style="font-size:14px;color:var(--gold)">★ 5.0</p>
+        <div class="verified">✓ Verified</div>
+      </div>
+      <div class="guide-card">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--moss),var(--sage));margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:22px">SL</div>
+        <p class="font-display" style="font-size:20px;font-weight:500">Coach Sofia Lane</p>
+        <p style="font-size:13px;color:var(--mist);margin:4px 0">Personal Trainer</p>
+        <p style="font-size:14px;color:var(--gold)">★ 4.9</p>
+        <div class="verified">✓ Verified</div>
+      </div>
+    </div>
+    <p style="font-size:14px;color:var(--mist);margin-top:30px;opacity:0" id="s3-stat">30% of applicants declined — we only accept practitioners who meet our standard.</p>
+  </div>
+</div>
+
+<!-- Scene 5: Key Features -->
+<div class="scene" id="s4">
+  <div style="text-align:center;width:100%;max-width:1050px">
+    <p style="font-size:12px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:14px;opacity:0" id="s4-sub">Platform Features</p>
+    <h2 class="font-display" style="font-size:48px;font-weight:300;margin-bottom:36px;opacity:0" id="s4-head">Everything built in.</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" id="s4-cards">
+      <div class="feature-card"><div style="font-size:28px;margin-bottom:10px">📅</div><p style="font-size:16px;font-weight:500;margin-bottom:6px">Smart Booking</p><p style="font-size:13px;color:var(--mist);line-height:1.6">Free intro calls. Calendar sync. Conflict detection.</p></div>
+      <div class="feature-card"><div style="font-size:28px;margin-bottom:10px">💬</div><p style="font-size:16px;font-weight:500;margin-bottom:6px">Direct Messaging</p><p style="font-size:13px;color:var(--mist);line-height:1.6">Message guides before and after sessions.</p></div>
+      <div class="feature-card"><div style="font-size:28px;margin-bottom:10px">📝</div><p style="font-size:16px;font-weight:500;margin-bottom:6px">Session Notes</p><p style="font-size:13px;color:var(--mist);line-height:1.6">Track mood, key takeaways, and progress.</p></div>
+      <div class="feature-card"><div style="font-size:28px;margin-bottom:10px">🔮</div><p style="font-size:16px;font-weight:500;margin-bottom:6px">Community Circles</p><p style="font-size:13px;color:var(--mist);line-height:1.6">Group sessions with like-minded seekers.</p></div>
+      <div class="feature-card"><div style="font-size:28px;margin-bottom:10px">📚</div><p style="font-size:16px;font-weight:500;margin-bottom:6px">WellVerse Library</p><p style="font-size:13px;color:var(--mist);line-height:1.6">Articles, exercises, and meditations.</p></div>
+      <div class="feature-card"><div style="font-size:28px;margin-bottom:10px">📊</div><p style="font-size:16px;font-weight:500;margin-bottom:6px">Progress Tracking</p><p style="font-size:13px;color:var(--mist);line-height:1.6">Monthly reports across all dimensions.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 6: For Guides -->
+<div class="scene" id="s5">
+  <div style="text-align:center;max-width:900px">
+    <p style="font-size:12px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:14px;opacity:0" id="s5-sub">For Guides</p>
+    <h2 class="font-display" style="font-size:48px;font-weight:300;margin-bottom:50px;opacity:0" id="s5-head">Built for serious practitioners.</h2>
+    <div style="display:flex;gap:60px;justify-content:center" id="s5-nums">
+      <div class="stat-box"><div class="big-num" style="font-size:80px" data-target="85" data-suffix="%">0%</div><p style="font-size:14px;color:var(--mist);margin-top:8px">Revenue you keep</p></div>
+      <div class="stat-box"><div class="big-num" style="font-size:80px" data-target="0" data-suffix="%">0%</div><p style="font-size:14px;color:var(--mist);margin-top:8px">Commission for 90 days</p></div>
+      <div class="stat-box"><div class="big-num" style="font-size:80px" data-target="15" data-suffix="%">0%</div><p style="font-size:14px;color:var(--mist);margin-top:8px">After that. Below market.</p></div>
+    </div>
+    <p style="font-size:15px;color:var(--dust);margin-top:40px;opacity:0" id="s5-foot">Qualified discovery &middot; Practice analytics &middot; Built-in payments</p>
+  </div>
+</div>
+
+<!-- Scene 7: Pricing -->
+<div class="scene" id="s6">
+  <div style="text-align:center;width:100%;max-width:950px">
+    <p style="font-size:12px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:14px;opacity:0" id="s6-sub">Pricing</p>
+    <h2 class="font-display" style="font-size:48px;font-weight:300;margin-bottom:40px;opacity:0" id="s6-head">Start free. Stay free. Or go deeper.</h2>
+    <div style="display:flex;gap:20px;justify-content:center" id="s6-tiers">
+      <div class="tier-card">
+        <p style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--mist);text-transform:uppercase;margin-bottom:8px">Explorer</p>
+        <p class="font-display" style="font-size:28px;font-weight:600">Free forever</p>
+        <div style="margin-top:18px;text-align:left">
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> Browse all guide profiles</p>
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> Access WellVerse Library</p>
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> 1 free community circle</p>
+          <p style="font-size:13px;color:var(--dust)"><span style="color:var(--sage)">✓</span> 1 free intro call</p>
+        </div>
+      </div>
+      <div class="tier-card popular">
+        <div class="most-pop">MOST POPULAR</div>
+        <p style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--mist);text-transform:uppercase;margin-bottom:8px">Seeker</p>
+        <p class="font-display" style="font-size:28px;font-weight:600;color:var(--gold)">Pay per session</p>
+        <div style="margin-top:18px;text-align:left">
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> Everything in Explorer</p>
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> Book at guide's rate</p>
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> Session notes & tracking</p>
+          <p style="font-size:13px;color:var(--dust)"><span style="color:var(--sage)">✓</span> Direct messaging</p>
+        </div>
+      </div>
+      <div class="tier-card">
+        <p style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--mist);text-transform:uppercase;margin-bottom:8px">Committed</p>
+        <p class="font-display" style="font-size:28px;font-weight:600">$49 / month</p>
+        <div style="margin-top:18px;text-align:left">
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> Everything in Seeker</p>
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> Unlimited circles</p>
+          <p style="font-size:13px;color:var(--dust);margin-bottom:6px"><span style="color:var(--sage)">✓</span> 10% off all sessions</p>
+          <p style="font-size:13px;color:var(--dust)"><span style="color:var(--sage)">✓</span> Monthly progress report</p>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:14px;color:var(--mist);margin-top:28px;opacity:0" id="s6-foot">No credit card required. Ever.</p>
+  </div>
+</div>
+
+<!-- Scene 8: Vetting -->
+<div class="scene" id="s7">
+  <div style="text-align:center;max-width:850px">
+    <p style="font-size:12px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:14px;opacity:0" id="s7-sub">Guide Vetting</p>
+    <h2 class="font-display" style="font-size:48px;font-weight:300;margin-bottom:50px;opacity:0" id="s7-head">Trust you can verify.</h2>
+    <div style="display:flex;flex-direction:column;gap:24px;text-align:left" id="s7-steps">
+      <div class="vet-step"><div class="vet-num">01</div><div><p style="font-size:18px;font-weight:500;margin-bottom:4px">Application & Credentials</p><p style="font-size:14px;color:var(--mist);line-height:1.6">Guides submit qualifications and professional history. We verify with issuing bodies directly.</p></div></div>
+      <div class="vet-step"><div class="vet-num">02</div><div><p style="font-size:18px;font-weight:500;margin-bottom:4px">Practice Interview</p><p style="font-size:14px;color:var(--mist);line-height:1.6">30-min video call with our Guide Quality team — approach, ethics, and values alignment.</p></div></div>
+      <div class="vet-step"><div class="vet-num">03</div><div><p style="font-size:18px;font-weight:500;margin-bottom:4px">3 Supervised Sessions</p><p style="font-size:14px;color:var(--mist);line-height:1.6">New guides complete 3 sessions with vetted clients. Feedback reviewed before full approval.</p></div></div>
+      <div class="vet-step"><div class="vet-num">04</div><div><p style="font-size:18px;font-weight:500;margin-bottom:4px">Ongoing Review</p><p style="font-size:14px;color:var(--mist);line-height:1.6">Guides rated below 4.5★ trigger a review. Consistent complaints result in removal.</p></div></div>
+    </div>
+    <div style="margin-top:36px;padding:16px 28px;background:rgba(42,106,96,.12);border:1px solid rgba(42,106,96,.3);border-radius:12px;display:inline-block;opacity:0" id="s7-stat">
+      <p style="font-size:14px;color:var(--pine);font-weight:500">124 applied &middot; 87 approved &middot; 37 declined</p>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 9: Stats -->
+<div class="scene" id="s8">
+  <div style="text-align:center;max-width:950px;position:relative">
+    <div id="aurora-bg" style="position:absolute;inset:-100px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(42,106,96,.12),transparent 70%);animation:aurora 6s ease infinite;background-size:200% 200%;pointer-events:none"></div>
+    <p style="font-size:12px;font-weight:700;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:14px;opacity:0;position:relative" id="s8-sub">WellVerse Today</p>
+    <h2 class="font-display" style="font-size:48px;font-weight:300;margin-bottom:50px;opacity:0;position:relative" id="s8-head">The numbers speak.</h2>
+    <div style="display:flex;gap:50px;justify-content:center;position:relative" id="s8-stats">
+      <div class="stat-box"><div class="stat-num" data-target="847">0</div><p style="font-size:14px;color:var(--mist);margin-top:8px">Founding Members</p></div>
+      <div class="stat-box"><div class="stat-num" data-target="124">0</div><p style="font-size:14px;color:var(--mist);margin-top:8px">Vetted Guides</p></div>
+      <div class="stat-box"><div class="stat-num" data-target="2300">0</div><p style="font-size:14px;color:var(--mist);margin-top:8px">Intro Sessions</p></div>
+      <div class="stat-box"><div class="stat-num" data-target="4.8" data-decimal="true">0</div><p style="font-size:14px;color:var(--mist);margin-top:8px">Average Rating ★</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 10: CTA -->
+<div class="scene" id="s9">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:24px">
+    <div style="width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--gold),var(--teal));display:flex;align-items:center;justify-content:center;font-size:44px;opacity:0" id="s9-logo">✦</div>
+    <div style="text-align:center">
+      <h2 class="font-display" style="font-size:56px;font-weight:300;opacity:0" id="s9-head">Invest in your <span class="text-shimmer font-display" style="font-weight:500;font-style:italic" id="s9-word">Mind</span></h2>
+    </div>
+    <p style="font-size:22px;color:var(--dust);letter-spacing:1px;opacity:0" id="s9-cta">Start free today.</p>
+    <p style="font-size:16px;color:var(--amber);letter-spacing:2px;font-weight:500;opacity:0" id="s9-url">wellverse.app</p>
+  </div>
+</div>
+
+</div>
+
+<div id="progress-bar"></div>
+<div id="scene-dots"></div>
+<div id="controls">
+  <button id="btn-sound" onclick="this.textContent=this.textContent==='🔇 Sound Off'?'🔊 Sound On':'🔇 Sound Off'">🔇 Sound Off</button>
+  <button id="btn-replay" onclick="restart()" style="display:none">↻ Replay</button>
+</div>
+
+<script>
+// Particle system
+const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+let W,H;function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+const particles=[];
+for(let i=0;i<60;i++){particles.push({x:Math.random()*2000,y:Math.random()*1200,r:Math.random()*2+.5,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,a:Math.random()*.4+.1,phase:Math.random()*Math.PI*2})}
+let particleIntensity=1;
+function drawParticles(t){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    const flicker=.5+.5*Math.sin(t*.001+p.phase);
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r*particleIntensity,0,Math.PI*2);
+    ctx.fillStyle=`rgba(226,185,111,${p.a*flicker*particleIntensity})`;ctx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+requestAnimationFrame(drawParticles);
+
+// Scene management
+const SCENES=10;
+const TIMINGS=[5000,7000,10000,10000,10000,10000,10000,10000,10000,8000];// ms per scene
+let currentScene=-1,startTime=0,playing=false,totalDuration=TIMINGS.reduce((a,b)=>a+b,0);
+
+// Build dots
+const dotsEl=document.getElementById('scene-dots');
+for(let i=0;i<SCENES;i++){const d=document.createElement('div');d.className='dot';d.onclick=()=>goToScene(i);dotsEl.appendChild(d)}
+const dots=[...dotsEl.children];
+
+function goToScene(n){
+  if(n===currentScene)return;
+  const prev=currentScene;currentScene=n;
+  document.querySelectorAll('.scene').forEach((s,i)=>{s.classList.toggle('active',i===n)});
+  dots.forEach((d,i)=>d.classList.toggle('active',i===n));
+  animateScene(n);
+}
+
+function animateScene(n){
+  const s=document.getElementById('s'+n);
+  if(n===0)animateLogo();
+  else if(n===1)animateProblem();
+  else if(n===2)animateSolution();
+  else if(n===3)animateGuides();
+  else if(n===4)animateFeatures();
+  else if(n===5)animateForGuides();
+  else if(n===6)animatePricing();
+  else if(n===7)animateVetting();
+  else if(n===8)animateStats();
+  else if(n===9)animateCTA();
+}
+
+function animateLogo(){
+  const c=document.getElementById('logo-circle');
+  c.style.opacity='1';c.style.transform='scale(1)';
+  const text='WellVerse';const el=document.getElementById('logo-letters');el.innerHTML='';
+  text.split('').forEach((ch,i)=>{
+    const sp=document.createElement('span');sp.textContent=ch;
+    sp.style.cssText=`display:inline-block;opacity:0;animation:letterReveal .4s ease ${i*.08+.6}s forwards`;
+    el.appendChild(sp);
+  });
+  setTimeout(()=>{document.getElementById('logo-tag').style.opacity='1'},1800);
+}
+
+function stagger(sel,cls,delay,base){
+  document.querySelectorAll(sel).forEach((el,i)=>{setTimeout(()=>el.classList.add(cls),base+i*delay)});
+}
+function fadeEl(id,delay){setTimeout(()=>{const e=document.getElementById(id);if(e)e.style.opacity='1';if(e)e.style.animation='fadeUp .6s ease forwards'},delay)}
+
+function animateProblem(){
+  const h=document.getElementById('s1-head');h.style.animation='fadeUp .8s ease forwards';
+  stagger('#s1-pains .pain','show',500,800);
+}
+function animateSolution(){
+  fadeEl('s2-sub',0);fadeEl('s2-head',300);
+  const items=document.querySelectorAll('#s2-hex .hex-item');
+  items.forEach((el,i)=>{
+    setTimeout(()=>{el.classList.add('show');
+      setTimeout(()=>{const icon=el.querySelector('.hex-icon');icon.classList.add('lit');icon.style.color=el.dataset.color},300);
+    },800+i*300);
+  });
+  fadeEl('s2-foot',3200);
+}
+function animateGuides(){
+  fadeEl('s3-sub',0);fadeEl('s3-head',300);
+  const cards=document.querySelectorAll('#s3-cards .guide-card');
+  cards.forEach((c,i)=>{setTimeout(()=>{c.classList.add('show');
+    setTimeout(()=>c.querySelector('.verified').classList.add('show'),400);
+  },700+i*400)});
+  fadeEl('s3-stat',3000);
+}
+function animateFeatures(){
+  fadeEl('s4-sub',0);fadeEl('s4-head',300);
+  stagger('#s4-cards .feature-card','show',300,600);
+}
+function animateForGuides(){
+  fadeEl('s5-sub',0);fadeEl('s5-head',300);
+  const boxes=document.querySelectorAll('#s5-nums .stat-box');
+  boxes.forEach((b,i)=>{
+    setTimeout(()=>{b.classList.add('show');
+      const numEl=b.querySelector('.big-num');
+      const target=parseInt(numEl.dataset.target);const suffix=numEl.dataset.suffix||'';
+      animateCounter(numEl,0,target,1200,v=>v+suffix);
+    },800+i*500);
+  });
+  fadeEl('s5-foot',3500);
+}
+function animatePricing(){
+  fadeEl('s6-sub',0);fadeEl('s6-head',300);
+  stagger('#s6-tiers .tier-card','show',400,600);
+  fadeEl('s6-foot',2600);
+}
+function animateVetting(){
+  fadeEl('s7-sub',0);fadeEl('s7-head',300);
+  stagger('#s7-steps .vet-step','show',500,700);
+  fadeEl('s7-stat',3200);
+}
+function animateStats(){
+  fadeEl('s8-sub',0);fadeEl('s8-head',300);
+  const boxes=document.querySelectorAll('#s8-stats .stat-box');
+  boxes.forEach((b,i)=>{
+    setTimeout(()=>{b.classList.add('show');
+      const numEl=b.querySelector('.stat-num');
+      const target=parseFloat(numEl.dataset.target);
+      const isDecimal=numEl.dataset.decimal==='true';
+      if(isDecimal)animateCounter(numEl,0,48,1500,v=>(v/10).toFixed(1)+'★');
+      else if(target>1000)animateCounter(numEl,0,target,1500,v=>v.toLocaleString()+'+');
+      else animateCounter(numEl,0,target,1500,v=>v.toString());
+    },600+i*400);
+  });
+}
+function animateCTA(){
+  particleIntensity=2;
+  const logo=document.getElementById('s9-logo');logo.style.animation='scaleIn .8s ease forwards';
+  fadeEl('s9-head',600);fadeEl('s9-cta',1200);fadeEl('s9-url',1800);
+  // Word cycling
+  const words=['Mind','Body','Soul','Energy','Clarity','Purpose','Connection','Strength','Joy','Balance'];
+  let wi=0;const wordEl=document.getElementById('s9-word');
+  const cyc=setInterval(()=>{wi=(wi+1)%words.length;wordEl.textContent=words[wi]},700);
+  setTimeout(()=>clearInterval(cyc),7000);
+}
+
+function animateCounter(el,start,end,duration,fmt){
+  const t0=performance.now();
+  function tick(now){
+    const p=Math.min((now-t0)/duration,1);
+    const eased=1-Math.pow(1-p,3);
+    const v=Math.round(start+(end-start)*eased);
+    el.textContent=fmt(v);
+    if(p<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// Reset all animations for replay
+function resetAll(){
+  particleIntensity=1;currentScene=-1;
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  dots.forEach(d=>d.classList.remove('active'));
+  // Reset inline opacity/animations
+  ['s1-head','s2-sub','s2-head','s2-foot','s3-sub','s3-head','s3-stat','s4-sub','s4-head','s5-sub','s5-head','s5-foot','s6-sub','s6-head','s6-foot','s7-sub','s7-head','s7-stat','s8-sub','s8-head','s9-head','s9-cta','s9-url'].forEach(id=>{
+    const e=document.getElementById(id);if(e){e.style.opacity='0';e.style.animation='none'}
+  });
+  document.getElementById('logo-circle').style.cssText='width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--gold),var(--teal));display:flex;align-items:center;justify-content:center;font-size:36px;opacity:0;transform:scale(.5);transition:all 1s ease';
+  document.getElementById('logo-tag').style.opacity='0';
+  document.getElementById('logo-letters').innerHTML='';
+  document.getElementById('s9-logo').style.cssText='width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--gold),var(--teal));display:flex;align-items:center;justify-content:center;font-size:44px;opacity:0';
+  document.querySelectorAll('.pain,.guide-card,.feature-card,.tier-card,.vet-step,.stat-box,.hex-item').forEach(e=>{e.classList.remove('show');e.style.animation='none'});
+  document.querySelectorAll('.verified').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.hex-icon').forEach(e=>{e.classList.remove('lit');e.style.color=''});
+  document.getElementById('progress-bar').style.width='0';
+  document.getElementById('btn-replay').style.display='none';
+}
+
+function restart(){resetAll();setTimeout(startTour,200)}
+
+function startTour(){
+  playing=true;startTime=performance.now();
+  document.getElementById('btn-replay').style.display='none';
+  let elapsed=0;
+  function advance(){
+    if(!playing)return;
+    const now=performance.now();elapsed=now-startTime;
+    // Progress bar
+    const pct=Math.min(elapsed/totalDuration*100,100);
+    document.getElementById('progress-bar').style.width=pct+'%';
+    // Determine scene
+    let acc=0,target=0;
+    for(let i=0;i<SCENES;i++){acc+=TIMINGS[i];if(elapsed<acc){target=i;break}if(i===SCENES-1)target=SCENES-1}
+    if(target!==currentScene)goToScene(target);
+    if(elapsed<totalDuration)requestAnimationFrame(advance);
+    else{playing=false;document.getElementById('btn-replay').style.display='block'}
+  }
+  requestAnimationFrame(advance);
+}
+
+// Auto-start
+window.addEventListener('load',()=>setTimeout(startTour,300));
+</script>
+</body>
+</html>

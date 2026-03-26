@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Database
+*.db
+*.sqlite3
+
+# Environment & Secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.jks
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Uploads
+uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
